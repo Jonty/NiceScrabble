@@ -40,6 +40,8 @@ if (typeof exports == 'object') {
   http://code.google.com/p/scrabbly/source/browse/trunk/scrabble.js
 */
 
+var afinn = require('./afinn.json');
+
 if (typeof triggerEvent == 'undefined') {
     triggerEvent = function() {
         // console.log.apply(console, arguments);
@@ -584,16 +586,9 @@ function calculateMove(squares)
                     var isNewWord = false;
                     for (; x < 15 && squares[x][y].tile; x++) {
                         var square = squares[x][y];
-                        var letterScore = square.tile.score;
                         isNewWord = isNewWord || !square.tileLocked;
                         if (!square.tileLocked) {
                             switch (square.type) {
-                            case 'DoubleLetter':
-                                letterScore *= 2;
-                                break;
-                            case 'TripleLetter':
-                                letterScore *= 3;
-                                break;
                             case 'DoubleWord':
                                 wordMultiplier *= 2;
                                 break;
@@ -602,8 +597,11 @@ function calculateMove(squares)
                                 break;
                             }
                         }
-                        wordScore += letterScore;
                         letters += square.tile.letter;
+                    }
+                    sentimentScore = afinn[obj];
+                    if (typeof item !== 'undefined') {
+                        wordScore = sentimentScore;
                     }
                     wordScore *= wordMultiplier;
                     if (isNewWord) {
